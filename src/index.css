@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fond */
+  --color-warm-white: #FDF8F5;
+
+  /* Grille / cellules mortes */
+  --color-soft-gray: #F0EEEC;
+  --color-soft-gray-hover: #E5E3E0;
+
+  /* Cellules vivantes - mint */
+  --color-mint: #7DD3C0;
+  --color-mint-dark: #5CB8A5;
+
+  /* Textes */
+  --color-text-dark: #4A4A4A;
+  --color-text-light: #7A7A7A;
+
+  /* Boutons */
+  --color-btn-green: #A8E6CF;
+  --color-btn-green-hover: #8DD4B8;
+  --color-btn-red: #FFAAA5;
+  --color-btn-red-hover: #FF8A84;
+  --color-btn-blue: #A8D8EA;
+  --color-btn-blue-hover: #8CC8DE;
+  --color-btn-gray: #E8E8E8;
+  --color-btn-gray-hover: #D8D8D8;
+  --color-btn-purple: #D4A5D9;
+  --color-btn-purple-hover: #C490CA;
+
+  /* Panel */
+  --color-panel: #FFFFFF;
+  --color-border: #E0E0E0;
+}
