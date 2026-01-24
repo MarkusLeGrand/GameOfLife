@@ -8,15 +8,18 @@ function App() {
   const {
     grid,
     isRunning,
+    isReversing,
     generation,
     population,
     speed,
-    currentStructures,
-    structureStats,
+    encounteredStructures,
     coloredCells,
+    canGoBack,
     toggleCell,
     step,
+    stepBack,
     play,
+    playReverse,
     stop,
     reset,
     randomize,
@@ -25,35 +28,33 @@ function App() {
   } = useGameOfLife(50, 50);
 
   return (
-    <div className="min-h-screen bg-warm-white p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Main content */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
-          {/* Grid */}
-          <div className="overflow-auto max-w-full">
-            <Grid grid={grid} onCellClick={toggleCell} coloredCells={coloredCells} />
-          </div>
+    <div className="h-screen bg-warm-white p-4 overflow-hidden">
+      <div className="h-full flex gap-4 items-center justify-center">
+        {/* Grid */}
+        <div className="shrink-0">
+          <Grid grid={grid} onCellClick={toggleCell} coloredCells={coloredCells} />
+        </div>
 
-          {/* Controls */}
-          <div className="w-64 flex flex-col gap-4">
-            <Controls
-              isRunning={isRunning}
-              generation={generation}
-              population={population}
-              speed={speed}
-              onPlay={play}
-              onStop={stop}
-              onStep={step}
-              onReset={reset}
-              onRandomize={randomize}
-              onSpeedChange={setSpeed}
-            />
-            <Patterns onSelectPattern={placePattern} onReset={reset} />
-            <StructureStats
-              currentStructures={currentStructures}
-              totalStats={structureStats}
-            />
-          </div>
+        {/* Controls */}
+        <div className="flex flex-col gap-3 max-h-full overflow-y-auto">
+          <Controls
+            isRunning={isRunning}
+            isReversing={isReversing}
+            generation={generation}
+            population={population}
+            speed={speed}
+            canGoBack={canGoBack}
+            onPlay={play}
+            onPlayReverse={playReverse}
+            onStop={stop}
+            onStep={step}
+            onStepBack={stepBack}
+            onReset={reset}
+            onRandomize={randomize}
+            onSpeedChange={setSpeed}
+          />
+          <Patterns onSelectPattern={placePattern} onReset={reset} />
+          <StructureStats encounteredStructures={encounteredStructures} />
         </div>
       </div>
     </div>

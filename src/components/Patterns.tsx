@@ -6,17 +6,24 @@ function parsePattern(strings: string[]): boolean[][] {
   );
 }
 
-// couleurs pastel pr chaque structure (meme que dans le hook)
+// couleurs pastel pr chaque structure (bien distinctes)
 const STRUCTURE_COLORS: Record<string, string> = {
   'Block': '#FFB3BA',
-  'Beehive': '#FFDFBA',
+  'Beehive': '#98D8C8',
   'Loaf': '#FFFFBA',
+  'Boat': '#C9B1FF',
+  'Tub': '#FFD700',
+  'Ship': '#87CEFA',
+  'Pond': '#E6E6FA',
   'Blinker': '#BAFFC9',
-  'Toad': '#BAE1FF',
+  'Toad': '#FF9AA2',
   'Beacon': '#E0BBE4',
+  'Clock': '#DDA0DD',
   'Pulsar': '#C9C9FF',
   'Glider': '#FFC8DD',
   'LWSS': '#A2D2FF',
+  'MWSS': '#7FCDCD',
+  'HWSS': '#B0E0E6',
   'Gosper Gun': '#FFE5B4',
 };
 
@@ -50,6 +57,43 @@ const PATTERNS = {
       '..X.',
     ]),
   },
+  boat: {
+    name: 'Boat',
+    category: 'Stable',
+    pattern: parsePattern([
+      'XX.',
+      'X.X',
+      '.X.',
+    ]),
+  },
+  tub: {
+    name: 'Tub',
+    category: 'Stable',
+    pattern: parsePattern([
+      '.X.',
+      'X.X',
+      '.X.',
+    ]),
+  },
+  ship: {
+    name: 'Ship',
+    category: 'Stable',
+    pattern: parsePattern([
+      'XX.',
+      'X.X',
+      '.XX',
+    ]),
+  },
+  pond: {
+    name: 'Pond',
+    category: 'Stable',
+    pattern: parsePattern([
+      '.XX.',
+      'X..X',
+      'X..X',
+      '.XX.',
+    ]),
+  },
 
   // ===== OSCILLATEUR (reviene a leur etat initial) =====
   blinker: {
@@ -75,6 +119,16 @@ const PATTERNS = {
       'XX..',
       '..XX',
       '..XX',
+    ]),
+  },
+  clock: {
+    name: 'Clock',
+    category: 'Oscillateur',
+    pattern: parsePattern([
+      '.X..',
+      '..XX',
+      'XX..',
+      '..X.',
     ]),
   },
   pulsar: {
@@ -115,6 +169,28 @@ const PATTERNS = {
       '....X',
       'X...X',
       '.XXXX',
+    ]),
+  },
+  mwss: {
+    name: 'MWSS',
+    category: 'Vaisseau',
+    pattern: parsePattern([
+      '..X...',
+      'X...X.',
+      '.....X',
+      'X....X',
+      '.XXXXX',
+    ]),
+  },
+  hwss: {
+    name: 'HWSS',
+    category: 'Vaisseau',
+    pattern: parsePattern([
+      '..XX...',
+      'X....X.',
+      '......X',
+      'X.....X',
+      '.XXXXXX',
     ]),
   },
 

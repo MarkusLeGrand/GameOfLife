@@ -1,69 +1,58 @@
-import type { StructureCount } from '../hooks/useGameOfLife';
-
-// couleurs pastel pr chaque structure
+// couleurs pastel pr chaque structure (bien distinctes)
 const STRUCTURE_COLORS: Record<string, string> = {
   'Block': '#FFB3BA',
-  'Beehive': '#FFDFBA',
+  'Beehive': '#98D8C8',
   'Loaf': '#FFFFBA',
+  'Boat': '#C9B1FF',
+  'Tub': '#FFD700',
+  'Ship': '#87CEFA',
+  'Pond': '#E6E6FA',
   'Blinker': '#BAFFC9',
-  'Toad': '#BAE1FF',
+  'Toad': '#FF9AA2',
   'Beacon': '#E0BBE4',
+  'Clock': '#DDA0DD',
+  'Pulsar': '#C9C9FF',
   'Glider': '#FFC8DD',
   'LWSS': '#A2D2FF',
+  'MWSS': '#7FCDCD',
+  'HWSS': '#B0E0E6',
 };
 
 // props du composant
 interface StructureStatsProps {
-  currentStructures: StructureCount;
-  totalStats: StructureCount;
+  encounteredStructures: Set<string>;
 }
 
-// composant pr afficher les stats de structures
-export function StructureStats({ currentStructures, totalStats }: StructureStatsProps) {
-  const hasAny = Object.keys(totalStats).length > 0;
+// composant pr afficher les structures rencontrees
+export function StructureStats({ encounteredStructures }: StructureStatsProps) {
+  const structures = Array.from(encounteredStructures);
 
   return (
     <div className="flex flex-col gap-3 p-4 bg-panel rounded-xl w-64 border border-border shadow-sm">
       <h2 className="text-sm font-semibold text-text-dark text-center">
-        Structures detectees
+        Structures rencontrees
       </h2>
 
-      {!hasAny ? (
+      {structures.length === 0 ? (
         <p className="text-xs text-text-light text-center">
           Aucune structure detectee
         </p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {Object.entries(totalStats)
-            .sort((a, b) => b[1] - a[1])
-            .map(([name, maxCount]) => {
-              const currentCount = currentStructures[name] || 0;
-              const color = STRUCTURE_COLORS[name] || '#7DD3C0';
-              return (
-                <div key={name} className="flex justify-between items-center">
-                  <span
-                    className="text-xs px-2 py-1 rounded text-text-dark"
-                    style={{ backgroundColor: color }}
-                  >
-                    {name}
-                  </span>
-                  <div className="flex gap-2 items-center">
-                    <span className="text-xs font-bold text-text-dark">
-                      {currentCount}
-                    </span>
-                    <span className="text-xs text-text-light">
-                      (max: {maxCount})
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+        <div className="flex flex-wrap gap-2">
+          {structures.map((name) => {
+            const color = STRUCTURE_COLORS[name] || '#7DD3C0';
+            return (
+              <span
+                key={name}
+                className="text-xs px-2 py-1 rounded text-text-dark"
+                style={{ backgroundColor: color }}
+              >
+                {name}
+              </span>
+            );
+          })}
         </div>
       )}
-
-      <p className="text-xs text-text-light text-center mt-1">
-        actuel / max durant la run
-      </p>
     </div>
   );
 }

@@ -8,17 +8,24 @@ export type StructureCount = Record<string, number>;
 // type pr les celules colorees (pos -> couleur)
 export type ColoredCells = Record<string, string>;
 
-// couleurs pastel pr chaque structure
+// couleurs pastel pr chaque structure (bien distinctes)
 const STRUCTURE_COLORS: Record<string, string> = {
   'Block': '#FFB3BA',     // rose pastel
-  'Beehive': '#FFDFBA',   // peche pastel
+  'Beehive': '#98D8C8',   // turquoise pastel
   'Loaf': '#FFFFBA',      // jaune pastel
+  'Boat': '#C9B1FF',      // violet clair
+  'Tub': '#FFD700',       // or
+  'Ship': '#87CEFA',      // bleu ciel clair
+  'Pond': '#E6E6FA',      // lavande
   'Blinker': '#BAFFC9',   // vert pastel
-  'Toad': '#BAE1FF',      // bleu pastel
+  'Toad': '#FF9AA2',      // corail
   'Beacon': '#E0BBE4',    // violet pastel
+  'Clock': '#DDA0DD',     // plum
   'Pulsar': '#C9C9FF',    // lavande pastel
   'Glider': '#FFC8DD',    // rose bonbon
   'LWSS': '#A2D2FF',      // bleu ciel
+  'MWSS': '#7FCDCD',      // teal clair
+  'HWSS': '#B0E0E6',      // powder blue
 };
 
 // structure pr stocker un pattern avec sa taille
@@ -113,6 +120,27 @@ function initPatterns() {
       [false,true,false,true],
       [false,false,true,false]
     ]]},
+    { name: 'Boat', patterns: [[
+      [true,true,false],
+      [true,false,true],
+      [false,true,false]
+    ]]},
+    { name: 'Tub', patterns: [[
+      [false,true,false],
+      [true,false,true],
+      [false,true,false]
+    ]]},
+    { name: 'Ship', patterns: [[
+      [true,true,false],
+      [true,false,true],
+      [false,true,true]
+    ]]},
+    { name: 'Pond', patterns: [[
+      [false,true,true,false],
+      [true,false,false,true],
+      [true,false,false,true],
+      [false,true,true,false]
+    ]]},
     // oscillateurs avec leurs differentes phases
     { name: 'Blinker', patterns: [
       [[true,true,true]], // horizontal
@@ -130,6 +158,12 @@ function initPatterns() {
       // phase 2 (coins manquant)
       [[true,true,false,false],[true,false,false,false],[false,false,false,true],[false,false,true,true]]
     ]},
+    { name: 'Clock', patterns: [
+      // phase 1
+      [[false,true,false,false],[false,false,true,true],[true,true,false,false],[false,false,true,false]],
+      // phase 2
+      [[false,false,true,false],[true,true,true,false],[false,true,true,true],[false,true,false,false]]
+    ]},
     // vaisseaux (4 phases chacun)
     { name: 'Glider', patterns: [
       [[false,true,false],[false,false,true],[true,true,true]],
@@ -142,6 +176,12 @@ function initPatterns() {
       [[false,false,true,true,false],[true,true,false,true,true],[true,true,true,true,false],[false,true,true,false,false]],
       [[true,true,true,true,false],[true,false,false,false,true],[false,false,false,false,true],[true,false,false,true,false]],
       [[false,true,true,false,false],[true,true,true,true,false],[true,true,false,true,true],[false,false,true,true,false]]
+    ]},
+    { name: 'MWSS', patterns: [
+      [[false,false,true,false,false,false],[true,false,false,false,true,false],[false,false,false,false,false,true],[true,false,false,false,false,true],[false,true,true,true,true,true]]
+    ]},
+    { name: 'HWSS', patterns: [
+      [[false,false,true,true,false,false,false],[true,false,false,false,false,true,false],[false,false,false,false,false,false,true],[true,false,false,false,false,false,true],[false,true,true,true,true,true,true]]
     ]},
   ];
 
@@ -236,10 +276,12 @@ function detectStructures(grid: Grid): { counts: Record<string, number>; colors:
 
   // tailles a tester (triee par taille decroissante pr priorite)
   const sizes = [
+    { h: 5, w: 7 }, { h: 7, w: 5 }, // HWSS
+    { h: 5, w: 6 }, { h: 6, w: 5 }, // MWSS
     { h: 4, w: 5 }, { h: 5, w: 4 }, // LWSS
-    { h: 4, w: 4 }, // Beacon, Loaf
+    { h: 4, w: 4 }, // Beacon, Loaf, Pond, Clock
     { h: 3, w: 4 }, { h: 4, w: 3 }, // Beehive, Toad
-    { h: 3, w: 3 }, // Glider
+    { h: 3, w: 3 }, // Glider, Boat, Tub, Ship
     { h: 2, w: 4 }, { h: 4, w: 2 }, // Toad phase 2
     { h: 2, w: 2 }, // Block
     { h: 1, w: 3 }, { h: 3, w: 1 }, // Blinker
@@ -398,19 +440,30 @@ export function useGameOfLife(initialRows: number = 30, initialCols: number = 50
   const [cols, setCols] = useState(initialCols);
   const [grid, setGrid] = useState<Grid>(() => createEmptyGrid(initialRows, initialCols));
   const [isRunning, setIsRunning] = useState(false);
+  const [isReversing, setIsReversing] = useState(false); // joue en arriere
   const [generation, setGeneration] = useState(0);
   const [speed, setSpeed] = useState(100); // en ms
-  const [structureStats, setStructureStats] = useState<StructureCount>({}); // compteur de structures
+  const [encounteredStructures, setEncounteredStructures] = useState<Set<string>>(new Set()); // structures rencontrees
+  const [history, setHistory] = useState<Grid[]>([]); // historique des generations
 
   // refs pr acceder aux valeur actuel ds les callback
   const runningRef = useRef(isRunning);
   runningRef.current = isRunning;
 
+  const reversingRef = useRef(isReversing);
+  reversingRef.current = isReversing;
+
   const speedRef = useRef(speed);
   speedRef.current = speed;
 
-  // ref pr tracker les structures deja comptee (pos + gen)
-  const seenStructuresRef = useRef<Set<string>>(new Set());
+  const historyRef = useRef(history);
+  historyRef.current = history;
+
+  const generationRef = useRef(generation);
+  generationRef.current = generation;
+
+  const gridRef = useRef(grid);
+  gridRef.current = grid;
 
   // compte la pop (celules vivante)
   const population = grid.flat().filter(Boolean).length;
@@ -427,45 +480,111 @@ export function useGameOfLife(initialRows: number = 30, initialCols: number = 50
     });
   }, []);
 
-  // avance dune generation
+  // avance dune generation (sauvegarde historique)
   const step = useCallback(() => {
-    setGrid((prevGrid) => computeNextGeneration(prevGrid));
-    setGeneration((prev) => prev + 1);
+    // sauvegarde la grille actuelle AVANT de la modifier
+    const currentGrid = gridRef.current;
+    const newHistory = [...historyRef.current, currentGrid];
+    if (newHistory.length > 1000) newHistory.shift();
+    historyRef.current = newHistory;
+    setHistory(newHistory);
+
+    // calcule et applique la nouvelle generation
+    const nextGrid = computeNextGeneration(currentGrid);
+    gridRef.current = nextGrid;
+    setGrid(nextGrid);
+
+    // update generation
+    const newGen = generationRef.current + 1;
+    generationRef.current = newGen;
+    setGeneration(newGen);
   }, []);
 
-  // boucle de simul
+  // recule d'une generation
+  const stepBack = useCallback(() => {
+    if (historyRef.current.length === 0) return;
+
+    // recupere la derniere grille de l'historique
+    const newHistory = [...historyRef.current];
+    const previousGrid = newHistory.pop()!;
+
+    // update refs immediatement
+    historyRef.current = newHistory;
+    setHistory(newHistory);
+
+    gridRef.current = previousGrid;
+    setGrid(previousGrid);
+
+    const newGen = Math.max(0, generationRef.current - 1);
+    generationRef.current = newGen;
+    setGeneration(newGen);
+  }, []);
+
+  // boucle de simul avant
   const run = useCallback(() => {
     if (!runningRef.current) return;
     step();
     setTimeout(run, speedRef.current);
   }, [step]);
 
-  // demarre la simul
+  // boucle de simul arriere (s'arrete a generation 0)
+  const runReverse = useCallback(() => {
+    if (!reversingRef.current) return;
+
+    // arrete si generation 0 ou pas d'historique
+    if (generationRef.current <= 0 || historyRef.current.length === 0) {
+      setIsReversing(false);
+      return;
+    }
+
+    // si on va arriver a generation 0, on fait le step et on arrete
+    const willReachZero = generationRef.current === 1;
+    stepBack();
+
+    if (willReachZero) {
+      setIsReversing(false);
+      return;
+    }
+
+    setTimeout(runReverse, speedRef.current);
+  }, [stepBack]);
+
+  // demarre la simul avant
   const play = useCallback(() => {
+    setIsReversing(false);
     setIsRunning(true);
+  }, []);
+
+  // demarre la simul arriere
+  const playReverse = useCallback(() => {
+    setIsRunning(false);
+    setIsReversing(true);
   }, []);
 
   // arrete la simul
   const stop = useCallback(() => {
     setIsRunning(false);
+    setIsReversing(false);
   }, []);
 
   // remet a zero
   const reset = useCallback(() => {
     setIsRunning(false);
+    setIsReversing(false);
     setGrid(createEmptyGrid(rows, cols));
     setGeneration(0);
-    setStructureStats({});
-    seenStructuresRef.current = new Set();
+    setEncounteredStructures(new Set());
+    setHistory([]);
   }, [rows, cols]);
 
   // genere une grile aleatoir
   const randomize = useCallback(() => {
     setIsRunning(false);
+    setIsReversing(false);
     setGrid(createRandomGrid(rows, cols));
     setGeneration(0);
-    setStructureStats({});
-    seenStructuresRef.current = new Set();
+    setEncounteredStructures(new Set());
+    setHistory([]);
   }, [rows, cols]);
 
   // place un pattern au centre (ou a une pos donnee)
@@ -514,7 +633,7 @@ export function useGameOfLife(initialRows: number = 30, initialCols: number = 50
     setIsRunning(false);
   }, []);
 
-  // lance la simul quand isRunning passe a true
+  // lance la simul avant quand isRunning passe a true
   useEffect(() => {
     if (isRunning) {
       const timeoutId = setTimeout(run, speedRef.current);
@@ -522,40 +641,51 @@ export function useGameOfLife(initialRows: number = 30, initialCols: number = 50
     }
   }, [isRunning, run]);
 
-  // update le compteur de structures a chaque changement de grile
+  // lance la simul arriere quand isReversing passe a true
+  useEffect(() => {
+    if (isReversing) {
+      const timeoutId = setTimeout(runReverse, speedRef.current);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isReversing, runReverse]);
+
+  // update les structures rencontrees a chaque changement de grile
   useEffect(() => {
     const { counts } = detectStructures(grid);
 
-    // pr chaque structure detectee, verifie si cest nouveau
-    setStructureStats(prev => {
-      const updated = { ...prev };
-
-      for (const [name, count] of Object.entries(counts)) {
-        // on ajoute le nb de nouvelles structures trouvee
-        // (on compte juste le max vu a chaque gen, pas cumul)
-        updated[name] = Math.max(updated[name] || 0, count);
-      }
-
-      return updated;
-    });
+    // ajoute les nouvelles structures rencontrees
+    const names = Object.keys(counts);
+    if (names.length > 0) {
+      setEncounteredStructures(prev => {
+        const updated = new Set(prev);
+        for (const name of names) {
+          updated.add(name);
+        }
+        return updated;
+      });
+    }
   }, [grid]);
 
   return {
     // etat
     grid,
     isRunning,
+    isReversing,
     generation,
     population,
     speed,
     rows,
     cols,
     currentStructures, // structures detectee maintenant
-    structureStats, // total des structures vues durant la run
+    encounteredStructures, // structures rencontrees durant la run
     coloredCells, // celules coloree par structure
+    canGoBack: history.length > 0, // peut reculer?
     // action
     toggleCell,
     step,
+    stepBack,
     play,
+    playReverse,
     stop,
     reset,
     randomize,

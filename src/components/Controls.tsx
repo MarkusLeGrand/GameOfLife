@@ -1,11 +1,15 @@
 interface ControlsProps {
   isRunning: boolean;
+  isReversing: boolean;
   generation: number;
   population: number;
   speed: number;
+  canGoBack: boolean;
   onPlay: () => void;
+  onPlayReverse: () => void;
   onStop: () => void;
   onStep: () => void;
+  onStepBack: () => void;
   onReset: () => void;
   onRandomize: () => void;
   onSpeedChange: (speed: number) => void;
@@ -13,12 +17,16 @@ interface ControlsProps {
 
 export const Controls = ({
   isRunning,
+  isReversing,
   generation,
   population,
   speed,
+  canGoBack,
   onPlay,
+  onPlayReverse,
   onStop,
   onStep,
+  onStepBack,
   onReset,
   onRandomize,
   onSpeedChange,
@@ -45,17 +53,26 @@ export const Controls = ({
 
       {/* Boutons principaux */}
       <div className="grid grid-cols-2 gap-2">
-        {!isRunning ? (
-          <button
-            onClick={onPlay}
-            className={`${buttonClass} bg-btn-green hover:bg-btn-green-hover text-text-dark`}
-          >
-            Play
-          </button>
+        {!isRunning && !isReversing ? (
+          <>
+            <button
+              onClick={onPlay}
+              className={`${buttonClass} bg-btn-green hover:bg-btn-green-hover text-text-dark`}
+            >
+              Play
+            </button>
+            <button
+              onClick={onPlayReverse}
+              disabled={!canGoBack}
+              className={`${buttonClass} bg-btn-orange hover:bg-btn-orange-hover text-text-dark`}
+            >
+              Rewind
+            </button>
+          </>
         ) : (
           <button
             onClick={onStop}
-            className={`${buttonClass} bg-btn-red hover:bg-btn-red-hover text-text-dark`}
+            className={`${buttonClass} col-span-2 bg-btn-red hover:bg-btn-red-hover text-text-dark`}
           >
             Stop
           </button>
@@ -63,10 +80,18 @@ export const Controls = ({
 
         <button
           onClick={onStep}
-          disabled={isRunning}
+          disabled={isRunning || isReversing}
           className={`${buttonClass} bg-btn-blue hover:bg-btn-blue-hover text-text-dark`}
         >
           Step
+        </button>
+
+        <button
+          onClick={onStepBack}
+          disabled={isRunning || isReversing || !canGoBack}
+          className={`${buttonClass} bg-btn-blue hover:bg-btn-blue-hover text-text-dark`}
+        >
+          Step Back
         </button>
 
         <button
@@ -91,9 +116,9 @@ export const Controls = ({
         </label>
         <input
           type="range"
-          min="10"
-          max="500"
-          step="10"
+          min="25"
+          max="1000"
+          step="25"
           value={speed}
           onChange={(e) => onSpeedChange(Number(e.target.value))}
           className="w-full h-2 bg-soft-gray rounded-lg appearance-none cursor-pointer
