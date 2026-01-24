@@ -112,13 +112,13 @@ export const Controls = ({
       {/* Contrôle de vitesse */}
       <div className="flex flex-col gap-1">
         <label className="text-text-light text-sm">
-          Vitesse: {speed}ms
+          Vitesse: {(1000 / speed).toFixed(1)} gen/s
         </label>
         <input
           type="range"
-          min="25"
+          min="333"
           max="1000"
-          step="25"
+          step="111"
           value={speed}
           onChange={(e) => onSpeedChange(Number(e.target.value))}
           className="w-full h-2 bg-soft-gray rounded-lg appearance-none cursor-pointer

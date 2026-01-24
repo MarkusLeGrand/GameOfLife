@@ -442,7 +442,7 @@ export function useGameOfLife(initialRows: number = 30, initialCols: number = 50
   const [isRunning, setIsRunning] = useState(false);
   const [isReversing, setIsReversing] = useState(false); // joue en arriere
   const [generation, setGeneration] = useState(0);
-  const [speed, setSpeed] = useState(100); // en ms
+  const [speed, setSpeed] = useState(333); // en ms (3 gen/s)
   const [encounteredStructures, setEncounteredStructures] = useState<Set<string>>(new Set()); // structures rencontrees
   const [history, setHistory] = useState<Grid[]>([]); // historique des generations
 
